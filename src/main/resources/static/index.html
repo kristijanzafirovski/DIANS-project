@@ -1,0 +1,50 @@
+<!-- src/main/resources/static/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header>
+    <h1>Financial Dashboard</h1>
+    <div style="display: flex; align-items: center;">
+        <input type="text" id="tickerSearch" placeholder="Search by Ticker">
+        <button class="search-button" onclick="searchTicker()">Search</button>
+    </div>
+</header>
+
+<div class="container">
+    <section id="overview" class="section">
+        <h2>Overview for <span id="tickerName"></span></h2>
+        <div class="chart" id="keyMetrics">Key Metrics Panel</div>
+        <div class="chart" id="summaryCharts">Summary Charts</div>
+    </section>
+
+    <section id="real-time" class="section">
+        <h2>Real-Time Data for <span id="tickerNameRealTime"></span></h2>
+        <div class="chart" id="liveDataFeed">Live Data Feed</div>
+        <div class="chart" id="realTimeCharts">Interactive Real-Time Charts</div>
+    </section>
+
+    <section id="trend-analysis" class="section">
+        <h2>Trend Analysis for <span id="tickerNameTrend"></span></h2>
+        <div class="chart" id="historicalTrends">Historical Trend Charts</div>
+        <div class="chart" id="predictiveModels">Predictive Models</div>
+        <div class="chart" id="statisticalAnalysis">Statistical Analysis Tables</div>
+    </section>
+
+    <section id="reports" class="section">
+        <h2>Reports for <span id="tickerNameReports"></span></h2>
+        <div class="chart" id="generatedReports">Generated Reports</div>
+        <div class="chart" id="customReportGenerator">Custom Report Generator</div>
+    </section>
+</div>
+
+
+
+<script src="script.js"></script>
+</body>
+</html>

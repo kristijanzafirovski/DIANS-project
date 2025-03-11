@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Stock Data</title>
+</head>
+<body>
+<h1>Stock Data</h1>
+<ul th:each="stock : ${stocks}">
+    <li th:text="${stock.symbol + ': ' + stock.price}"></li>
+</ul>
+</body>
+</html>
