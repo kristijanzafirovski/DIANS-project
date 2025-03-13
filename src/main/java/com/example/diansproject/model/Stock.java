@@ -1,46 +1,47 @@
 package com.example.diansproject.model;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.Getter;
-import jakarta.persistence.*;
-import java.time.LocalDateTime;
 
+
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
+
+@Setter
+@Getter
 @Entity
-@Table(name = "STOCKS")
-@Data
-@AllArgsConstructor
-@Builder
+@Table(name="stocks")
 public class Stock {
 
-    @Getter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "symbol", nullable = false)
     private String symbol;
-    private LocalDateTime timestamp;
-    private Double open;
-    private Double high;
-    private Double low;
-    private Double close;
-    private Long volume;
 
-    protected Stock() {} // Required by JPA
+    @Column(name = "last_refreshed")
+    private String lastRefreshed;
 
-    public Stock(String symbol, LocalDateTime timestamp, Double open, Double high,
-                 Double low, Double close, Long volume) {
+    @Column(name = "time_zone")
+    private String timeZone;
+
+    @ElementCollection
+    @CollectionTable(name = "stock_time_series", joinColumns = @JoinColumn(name = "stock_id"))
+    @MapKeyColumn(name = "date")
+    private Map<LocalDate, DailyStockData> timeSeries;
+
+
+    public Stock() {}
+
+
+    public Stock(String symbol, String lastRefreshed, String timeZone, Map<LocalDate, DailyStockData> timeSeries) {
         this.symbol = symbol;
-        this.timestamp = timestamp;
-        this.open = open;
-        this.high = high;
-        this.low = low;
-        this.close = close;
-        this.volume = volume;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
+        this.lastRefreshed = lastRefreshed;
+        this.timeZone = timeZone;
+        this.timeSeries = timeSeries;
     }
 
 }
