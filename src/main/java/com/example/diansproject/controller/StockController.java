@@ -18,6 +18,9 @@ public class StockController {
     @GetMapping("/stocks/{symbol}")
     public List<Stock> getStockData(@PathVariable String symbol) {
         // This will trigger the data ingestion, processing, and storage flow
+
+
+
         realTimeProcessingService.processAndStoreData(symbol);
 
         // Return the processed stock data

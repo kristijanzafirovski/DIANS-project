@@ -10,4 +10,6 @@ import java.util.List;
 @Repository
 public interface StockRepository extends JpaRepository<Stock, Long> {
     List<Stock> findBySymbol(String symbol);
+
+    boolean existsStockBySymbol(String ticker);
 }

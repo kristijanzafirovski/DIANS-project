@@ -24,20 +24,22 @@ public class RealTimeProcessingService {
 
     public void processAndStoreData(String symbol) {
         List<StockUnit> stockUnits = dataIngestService.fetchData(symbol);
-        Map<LocalDate, DailyStockData> timeseries = new HashMap<>();
-        for (StockUnit stockUnit : stockUnits) {
-            DailyStockData dailyData = new DailyStockData(
-                    new BigDecimal(stockUnit.getOpen()),
-                    new BigDecimal(stockUnit.getHigh()),
-                    new BigDecimal(stockUnit.getLow()),
-                    new BigDecimal(stockUnit.getClose()),
-                    stockUnit.getVolume()
-            );
-            timeseries.put(LocalDate.parse(stockUnit.getDate()), dailyData);
-        }
+        if(stockUnits != null) {
+            Map<LocalDate, DailyStockData> timeseries = new HashMap<>();
+            for (StockUnit stockUnit : stockUnits) {
+                DailyStockData dailyData = new DailyStockData(
+                        new BigDecimal(stockUnit.getOpen()),
+                        new BigDecimal(stockUnit.getHigh()),
+                        new BigDecimal(stockUnit.getLow()),
+                        new BigDecimal(stockUnit.getClose()),
+                        stockUnit.getVolume()
+                );
+                timeseries.put(LocalDate.parse(stockUnit.getDate()), dailyData);
+            }
 
-        Stock stock = new Stock(symbol, LocalDate.now().toString(), "US/Eastern", timeseries);
-        dataStorageService.saveStock(List.of(stock));
+            Stock stock = new Stock(symbol, LocalDate.now().toString(), "US/Eastern", timeseries);
+            dataStorageService.saveStock(List.of(stock));
+        }
     }
     public List<Stock> getProcessedStock(String symbol) {
         return dataStorageService.fetchData(symbol);
