@@ -6,7 +6,6 @@
     <title>Stock Ticker Search</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="styles.css">
-
 </head>
 <body>
 <div class="text-center"><h1>Stock Ticker Search</h1>
@@ -17,20 +16,32 @@
         </div>
     </div>
 </div>
-<div class="result-container" id="resultContainer">
-    <div class="card mt-3">
-        <div class="card-body">
-            <h5 class="card-title" id="tickerTitle">Ticker Data</h5>
-            <p id="tickerSymbol"></p>
-            <p id="lastRefreshed"></p>
-            <p id="timeZone"></p>
-            <h6>Time Series Data:</h6>
-            <div id="timeSeriesData"></div>
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h5 class="card-title">Stock Information</h5>
+                    <p>Stock name:</p>
+                    <p>Time since last update:</p>
+                    <select id="dateSelect" style="width: 200px;">
+                        <option value="">Select Date</option>
+                    </select>
+                    <div id="selectedDateData"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h5 class="card-title">Daily Chart</h5>
+                    <div id="chart"></div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
-
-
-<script src="js/script.js"></script>
+<script src="js/script.js" type="module"></script>
+<script src="js/D3.js" type="module"></script>
 </body>
 </html>
