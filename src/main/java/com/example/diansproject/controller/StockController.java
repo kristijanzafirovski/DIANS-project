@@ -1,71 +1,26 @@
 package com.example.diansproject.controller;
 
-import com.example.diansproject.service.ingest.impl.StockDataService;
-import com.tecacet.finance.model.Quote;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import com.example.diansproject.model.Stock;
+import com.example.diansproject.service.processing.RealTimeProcessingService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 
 @RestController
-@RequestMapping("/api/stocks")
 public class StockController {
 
-    private final StockDataService stockDataService;
+    @Autowired
+    private RealTimeProcessingService realTimeProcessingService;
 
-    public StockController(StockDataService stockDataService) {
-        this.stockDataService = stockDataService;
-    }
+    @GetMapping("/stocks/{symbol}")
+    public List<Stock> getStockData(@PathVariable String symbol) {
+        // This will trigger the data ingestion, processing, and storage flow
+        realTimeProcessingService.processAndStoreData(symbol);
 
-    @GetMapping("/{symbol}/history")
-    public ResponseEntity<?> getStockHistory(
-            @PathVariable String symbol,
-            @RequestParam String from,
-            @RequestParam String to) {
-
-        try {
-            LocalDate startDate = LocalDate.parse(from);
-            LocalDate endDate = LocalDate.parse(to);
-
-            List<Quote> history = stockDataService.getHistoricalPrices(
-                    symbol,
-                    startDate,
-                    endDate
-            );
-
-            return ResponseEntity.ok(history);
-
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "Failed to retrieve stock data"));
-        }
-    }
-
-    @GetMapping("/{symbol}/dividends")
-    public ResponseEntity<?> getDividendHistory(
-            @PathVariable String symbol,
-            @RequestParam String from,
-            @RequestParam String to) {
-
-        try {
-            LocalDate startDate = LocalDate.parse(from);
-            LocalDate endDate = LocalDate.parse(to);
-
-            Map<LocalDate, BigDecimal> dividends = stockDataService.getDividends(
-                    symbol,
-                    startDate,
-                    endDate
-            );
-
-            return ResponseEntity.ok(dividends);
-
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "Failed to retrieve dividend data"));
-        }
+        // Return the processed stock data
+        return realTimeProcessingService.getProcessedStock(symbol);
     }
 }
