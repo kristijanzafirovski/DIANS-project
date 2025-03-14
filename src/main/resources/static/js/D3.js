@@ -1,10 +1,12 @@
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 
-
 export function drawCandlestickChart(data) {
     const margin = { top: 20, right: 20, bottom: 30, left: 40 };
-    const width = 600 - margin.left - margin.right;
+    const width = 800 - margin.left - margin.right;
     const height = 400 - margin.top - margin.bottom;
+
+    // Clear existing chart using D3
+    d3.select('#chart').selectAll('*').remove();
 
     const svg = d3.select('#chart')
         .append('svg')
