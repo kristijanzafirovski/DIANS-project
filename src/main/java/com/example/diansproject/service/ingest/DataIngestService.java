@@ -8,6 +8,7 @@ import com.example.diansproject.repository.StockRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Time;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -31,6 +32,19 @@ public class DataIngestService {
             } else {
                 return null;
             }
+        }
+    }
+
+    public List<StockUnit> fetchIntradayData(String ticker) {
+        if(stockRepository.findBySymbol(ticker).isEmpty()) {
+            TimeSeriesResponse response = alphaVantageClient.timeSeries().intraday().forSymbol(ticker).fetchSync();
+            return response.getStockUnits();
+        }else{
+            Stock stock = stockRepository.findBySymbol(ticker).get(0);
+            if (!LocalDate.parse(stock.getLastRefreshed()).equals(LocalDate.now())) {
+                TimeSeriesResponse response = alphaVantageClient.timeSeries().intraday().forSymbol(ticker).fetchSync();
+                return response.getStockUnits();
+            }else return null;
         }
     }
 }

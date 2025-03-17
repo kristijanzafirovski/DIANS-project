@@ -36,6 +36,12 @@ function formatAndDisplayStockData(data) {
                 const selectedDateData = document.getElementById('selectedDateData');
                 selectedDateData.innerHTML = '';
                 const dataElement = document.createElement('p');
+                const sName = document.getElementById("sname");
+                const sTime = document.getElementById("stime");
+                sName.innerText = '';
+                sTime.innerText = '';
+                sName.innerText = "Stock Symbol: " + stock.symbol;
+                sTime.innerText = "Last refresh time: " + stock.lastRefreshed;
                 dataElement.innerText = `Open: ${dailyData.open}, High: ${dailyData.high}, Low: ${dailyData.low}, Close: ${dailyData.close}, Volume: ${dailyData.volume}`;
                 selectedDateData.appendChild(dataElement);
             }

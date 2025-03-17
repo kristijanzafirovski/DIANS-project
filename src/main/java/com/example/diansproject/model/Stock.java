@@ -33,6 +33,10 @@ public class Stock {
     @MapKeyColumn(name = "date")
     private Map<LocalDate, DailyStockData> timeSeries;
 
+    @ElementCollection
+    @CollectionTable(name = "stock_intraday_series", joinColumns = @JoinColumn(name = "stock_id"))
+    @MapKeyColumn(name = "timestamp")
+    private Map<String, IntradayStockData> intradayTimeSeries;
 
     public Stock() {}
 
