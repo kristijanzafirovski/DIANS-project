@@ -1,10 +1,13 @@
 package com.example.diansproject.service.ingest;
 
 import com.crazzyghost.alphavantage.AlphaVantage;
+import com.crazzyghost.alphavantage.parameters.Interval;
+import com.crazzyghost.alphavantage.parameters.OutputSize;
 import com.crazzyghost.alphavantage.timeseries.response.StockUnit;
 import com.crazzyghost.alphavantage.timeseries.response.TimeSeriesResponse;
 import com.example.diansproject.model.Stock;
 import com.example.diansproject.repository.StockRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +15,7 @@ import java.sql.Time;
 import java.time.LocalDate;
 import java.util.List;
 
+@Slf4j
 @Service
 public class DataIngestService {
     @Autowired
@@ -36,15 +40,9 @@ public class DataIngestService {
     }
 
     public List<StockUnit> fetchIntradayData(String ticker) {
-        if(stockRepository.findBySymbol(ticker).isEmpty()) {
-            TimeSeriesResponse response = alphaVantageClient.timeSeries().intraday().forSymbol(ticker).fetchSync();
+            TimeSeriesResponse response = alphaVantageClient.timeSeries().intraday().forSymbol(ticker).interval(Interval.FIVE_MIN).outputSize(OutputSize.FULL).fetchSync();
+            log.info(response.toString());
             return response.getStockUnits();
-        }else{
-            Stock stock = stockRepository.findBySymbol(ticker).get(0);
-            if (!LocalDate.parse(stock.getLastRefreshed()).equals(LocalDate.now())) {
-                TimeSeriesResponse response = alphaVantageClient.timeSeries().intraday().forSymbol(ticker).fetchSync();
-                return response.getStockUnits();
-            }else return null;
-        }
+
     }
 }

@@ -1,8 +1,14 @@
 package com.example.diansproject.model;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.List;
 
+@Setter
+@Getter
 public class StockAnalysis {
+    // Getters and setters
     private List<String> intradaySignals;
     private List<String> dailySignals;
 
@@ -13,9 +19,4 @@ public class StockAnalysis {
         this.dailySignals = dailySignals;
     }
 
-    // Getters and setters
-    public List<String> getIntradaySignals() { return intradaySignals; }
-    public void setIntradaySignals(List<String> intradaySignals) { this.intradaySignals = intradaySignals; }
-    public List<String> getDailySignals() { return dailySignals; }
-    public void setDailySignals(List<String> dailySignals) { this.dailySignals = dailySignals; }
 }

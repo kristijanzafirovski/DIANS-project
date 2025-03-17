@@ -3,6 +3,7 @@ import { drawCandlestickChart } from "./D3.js";
 document.getElementById('searchButton').addEventListener('click', function () {
     const ticker = document.getElementById('ticker').value;
     fetchStockData(ticker);
+    fetchAnalysis(ticker);
 });
 
 function fetchStockData(ticker) {
@@ -11,7 +12,6 @@ function fetchStockData(ticker) {
         .then(data => formatAndDisplayStockData(data))
         .catch(error => console.error('Error fetching stock data:', error));
 
-    document.getElementById('resultContainer').style.display = 'block';
 }
 
 function formatAndDisplayStockData(data) {
@@ -61,4 +61,26 @@ function formatAndDisplayStockData(data) {
     } else {
         document.getElementById('tickerTitle').innerText = 'No data found';
     }
+}
+
+function fetchAnalysis(symbol) {
+    fetch(`/analyze/${symbol}`)
+        .then(response => response.json())
+        .then(analysis => {
+            displayAnalysis(analysis);
+        });
+}
+
+function displayAnalysis(analysis) {
+    const analysisDiv = document.getElementById('analysisResults');
+
+    const intradayList = analysis.intradaySignals.map(s => `<li>${s}</li>`).join('');
+    const dailyList = analysis.dailySignals.map(s => `<li>${s}</li>`).join('');
+
+    analysisDiv.innerHTML = `
+        <h4>Intraday Signals:</h4>
+        <ul>${intradayList}</ul>
+        <h4>Daily Signals:</h4>
+        <ul>${dailyList}</ul>
+    `;
 }

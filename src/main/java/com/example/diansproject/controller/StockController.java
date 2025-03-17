@@ -1,6 +1,7 @@
 package com.example.diansproject.controller;
 
 import com.example.diansproject.model.Stock;
+import com.example.diansproject.model.StockAnalysis;
 import com.example.diansproject.service.processing.AnalysisService;
 import com.example.diansproject.service.processing.RealTimeProcessingService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,7 @@ public class StockController {
         return realTimeProcessingService.getProcessedStock(symbol);
     }
     @GetMapping("/analyze/{symbol}")
-    public List<Stock> analyzeStock(@PathVariable String symbol) {
+    public StockAnalysis analyzeStock(@PathVariable String symbol) {
         return analysisService.analyze(symbol);
     }
 }
