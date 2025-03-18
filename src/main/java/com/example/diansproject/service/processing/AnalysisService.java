@@ -50,7 +50,9 @@ public class AnalysisService {
         List<Bar> bars = new ArrayList<>();
         DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
         for (StockUnit unit : stockUnits) {
-            String str = unit.getDate().replace(" ", "T") + ":00Z";
+            String str = unit.getDate().replace(" ", "T") + "Z";
+            if(str.length() <= 11) continue;
+            log.info("UNIT: " + unit.getDate() + " STR: " + str);
             ZonedDateTime endTime = ZonedDateTime.parse(str, formatter);
             BaseBar bar = new BaseBar(
                     Duration.ofMinutes(5),endTime,

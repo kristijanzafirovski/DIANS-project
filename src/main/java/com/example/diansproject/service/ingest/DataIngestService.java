@@ -1,6 +1,7 @@
 package com.example.diansproject.service.ingest;
 
 import com.crazzyghost.alphavantage.AlphaVantage;
+import com.crazzyghost.alphavantage.AlphaVantageException;
 import com.crazzyghost.alphavantage.parameters.Interval;
 import com.crazzyghost.alphavantage.parameters.OutputSize;
 import com.crazzyghost.alphavantage.timeseries.response.StockUnit;
@@ -11,7 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.sql.Time;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -40,9 +40,15 @@ public class DataIngestService {
     }
 
     public List<StockUnit> fetchIntradayData(String ticker) {
-            TimeSeriesResponse response = alphaVantageClient.timeSeries().intraday().forSymbol(ticker).interval(Interval.FIVE_MIN).outputSize(OutputSize.FULL).fetchSync();
+            TimeSeriesResponse response = alphaVantageClient.timeSeries().intraday().forSymbol(ticker).
+                    interval(Interval.FIVE_MIN).outputSize(OutputSize.FULL).
+                    onFailure(e->handleFailure(e)).fetchSync();
             log.info(response.toString());
             return response.getStockUnits();
+
+    }
+
+    private void handleFailure(AlphaVantageException e){
 
     }
 }
