@@ -68,7 +68,21 @@ function fetchAnalysis(symbol) {
         .then(response => response.json())
         .then(analysis => {
             displayAnalysis(analysis);
+            drawChartWithSignals(analysis);
         });
+}
+
+function drawChartWithSignals(analysis) {
+    const chartData = Object.entries(stock.timeSeries).map(([date, values]) => ({
+        date: new Date(date),
+        open: values.open,
+        high: values.high,
+        low: values.low,
+        close: values.close,
+        volume: values.volume
+    }));
+
+    drawCandlestickChart(chartData, analysis.dailySignals);
 }
 
 function displayAnalysis(analysis) {
