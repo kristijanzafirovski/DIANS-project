@@ -88,13 +88,15 @@ function drawChartWithSignals(analysis) {
 function displayAnalysis(analysis) {
     const analysisDiv = document.getElementById('analysisResults');
 
-    const intradayList = analysis.intradaySignals.map(s => `<li>${s}</li>`).join('');
-    const dailyList = analysis.dailySignals.map(s => `<li>${s}</li>`).join('');
+    // Determine the latest signal
+    const intradaySignal = analysis.intradaySignals[analysis.intradaySignals.length - 1];
+    const dailySignal = analysis.dailySignals[analysis.dailySignals.length - 1];
 
     analysisDiv.innerHTML = `
-        <h4>Intraday Signals:</h4>
-        <ul>${intradayList}</ul>
-        <h4>Daily Signals:</h4>
-        <ul>${dailyList}</ul>
+        <h4>Intraday Recommendation:</h4>
+        <p>${intradaySignal}</p>
+        <h4>Daily Recommendation:</h4>
+        <p>${dailySignal}</p>
     `;
 }
+

@@ -40,10 +40,10 @@ public class DataIngestService {
     }
 
     public List<StockUnit> fetchIntradayData(String ticker) {
+
             TimeSeriesResponse response = alphaVantageClient.timeSeries().intraday().forSymbol(ticker).
                     interval(Interval.FIVE_MIN).outputSize(OutputSize.FULL).
                     onFailure(e->handleFailure(e)).fetchSync();
-            log.info(response.toString());
             return response.getStockUnits();
 
     }

@@ -35,7 +35,6 @@ public class AnalysisService {
 
     public StockAnalysis analyze(String symbol) {
         List<StockUnit> intradayData = dataIngestService.fetchIntradayData(symbol);
-        log.info("Analysis of " + symbol + " intraday data: " + intradayData);
         List<StockUnit> dailyData = dataIngestService.fetchData(symbol);
 
         List<Bar> intradayBarSeries = createBars(intradayData);
@@ -52,14 +51,12 @@ public class AnalysisService {
         );
     }
 
-
     private List<Bar> createBars(List<StockUnit> stockUnits) {
         List<Bar> bars = new ArrayList<>();
         DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
         for (StockUnit unit : stockUnits) {
             String str = unit.getDate().replace(" ", "T") + "Z";
             if(str.length() <= 11) continue;
-            log.info("UNIT: " + unit.getDate() + " STR: " + str);
             ZonedDateTime endTime = ZonedDateTime.parse(str, formatter);
             BaseBar bar = new BaseBar(
                     Duration.ofMinutes(5),endTime,
@@ -124,8 +121,8 @@ public class AnalysisService {
         List<String> signals = new ArrayList<>();
 
         ClosePriceIndicator closePrice = new ClosePriceIndicator(series);
-        SMAIndicator shortSma = new SMAIndicator(closePrice, 50);
-        SMAIndicator longSma = new SMAIndicator(closePrice, 200);
+        SMAIndicator shortSma = new SMAIndicator(closePrice, 10); // For intraday, use 10 and 30
+        SMAIndicator longSma = new SMAIndicator(closePrice, 30);
         RSIIndicator rsi = new RSIIndicator(closePrice, 14);
         MACDIndicator macd = new MACDIndicator(closePrice, 12, 26);
 
@@ -137,21 +134,22 @@ public class AnalysisService {
         return signals;
     }
 
-    private Signal getSignal(int index, SMAIndicator shortSma,
-                             SMAIndicator longSma, RSIIndicator rsi, MACDIndicator macd) {
+
+    private Signal getSignal(int index, SMAIndicator shortSma, SMAIndicator longSma, RSIIndicator rsi, MACDIndicator macd) {
         // Check for buy signals
         if ((shortSma.getValue(index).doubleValue() > longSma.getValue(index).doubleValue()) &&
                 (rsi.getValue(index).doubleValue() < 30) &&
-                (macd.getValue(index).doubleValue() > macd.getValue(index).doubleValue())) {
+                (macd.getValue(index).doubleValue() > 0)) {
             return Signal.BUY;
         }
         // Check for sell signals
         else if ((shortSma.getValue(index).doubleValue() < longSma.getValue(index).doubleValue()) &&
                 (rsi.getValue(index).doubleValue() > 70) &&
-                (macd.getValue(index).doubleValue() < macd.getValue(index).doubleValue())) {
+                (macd.getValue(index).doubleValue() < 0)) {
             return Signal.SELL;
         }
         return null;
     }
+
 }
 
