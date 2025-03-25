@@ -26,19 +26,24 @@ public class DataIngestService {
     public List<StockUnit> fetchData(String ticker) {
         // Check if stock is updated today
         if (stockRepository.findBySymbol(ticker).isEmpty()) {
+            log.info("No stock found for symbol: " + ticker);
             TimeSeriesResponse response = alphaVantageClient.timeSeries().daily().forSymbol(ticker).fetchSync();
             return response.getStockUnits();
         } else {
-            Stock stock = stockRepository.findBySymbol(ticker).get(0);
-            if (!LocalDate.parse(stock.getLastRefreshed()).equals(LocalDate.now())) {
-                TimeSeriesResponse response = alphaVantageClient.timeSeries().daily().forSymbol(ticker).fetchSync();
-                return response.getStockUnits();
-            } else {
-                return null;
-            }
+            log.info("Stock found for symbol: " + ticker);
+            TimeSeriesResponse response = alphaVantageClient.timeSeries().daily().forSymbol(ticker).fetchSync();
+            return response.getStockUnits();
         }
     }
-
+    public List<StockUnit> fetchHourlyIntradayData(String ticker) {
+        TimeSeriesResponse response = alphaVantageClient.timeSeries().intraday()
+                .forSymbol(ticker)
+                .interval(Interval.SIXTY_MIN)
+                .outputSize(OutputSize.FULL)
+                .onFailure(e->handleFailure(e))
+                .fetchSync();
+        return response.getStockUnits();
+    }
     public List<StockUnit> fetchIntradayData(String ticker) {
 
             TimeSeriesResponse response = alphaVantageClient.timeSeries().intraday().forSymbol(ticker).

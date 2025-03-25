@@ -22,6 +22,10 @@ public class RealTimeProcessingService {
     @Autowired
     private DataStorageService dataStorageService;
 
+    public List<Stock> getProcessedStock(String symbol) {
+        return dataStorageService.fetchData(symbol);
+    }
+
     public void processAndStoreData(String symbol) {
         List<StockUnit> stockUnits = dataIngestService.fetchData(symbol);
         if(stockUnits != null) {
@@ -37,11 +41,16 @@ public class RealTimeProcessingService {
                 timeseries.put(LocalDate.parse(stockUnit.getDate()), dailyData);
             }
 
-            Stock stock = new Stock(symbol, LocalDate.now().toString(), "US/Eastern", timeseries);
-            dataStorageService.saveStock(List.of(stock));
+            // Check if stock already exists
+            List<Stock> existingStocks = dataStorageService.fetchData(symbol);
+            if (!existingStocks.isEmpty()) {
+                Stock existingStock = existingStocks.get(0);
+                existingStock.setTimeSeries(timeseries);
+                dataStorageService.saveStock(List.of(existingStock));
+            } else {
+                Stock stock = new Stock(symbol, LocalDate.now(), "US/Eastern", timeseries);
+                dataStorageService.saveStock(List.of(stock));
+            }
         }
-    }
-    public List<Stock> getProcessedStock(String symbol) {
-        return dataStorageService.fetchData(symbol);
     }
 }

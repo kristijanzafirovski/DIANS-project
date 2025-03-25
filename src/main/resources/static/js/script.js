@@ -11,14 +11,13 @@ function fetchStockData(ticker) {
         .then(response => response.json())
         .then(data => formatAndDisplayStockData(data))
         .catch(error => console.error('Error fetching stock data:', error));
-
 }
 
 function formatAndDisplayStockData(data) {
     if (data.length > 0) {
         const stock = data[0];
 
-        // Populate the dropdown with dates
+
         const dateSelect = document.getElementById('dateSelect');
         dateSelect.innerHTML = '<option value="">Select Date</option>';
         Object.keys(stock.timeSeries).forEach(date => {
@@ -28,7 +27,6 @@ function formatAndDisplayStockData(data) {
             dateSelect.appendChild(option);
         });
 
-        // Add event listener to display data for selected date
         dateSelect.addEventListener('change', function () {
             const selectedDate = dateSelect.value;
             if (selectedDate !== '') {
@@ -47,7 +45,7 @@ function formatAndDisplayStockData(data) {
             }
         });
 
-        // Transform the data into an array of objects for the chart
+
         const chartData = Object.entries(stock.timeSeries).map(([date, values]) => ({
             date: new Date(date),
             open: values.open,
@@ -57,7 +55,11 @@ function formatAndDisplayStockData(data) {
             volume: values.volume
         }));
 
-        drawCandlestickChart(chartData);
+        if (typeof drawCandlestickChart === 'function') {
+            drawCandlestickChart(chartData);
+        } else {
+            console.error('drawCandlestickChart is not defined.');
+        }
     } else {
         document.getElementById('tickerTitle').innerText = 'No data found';
     }
@@ -68,35 +70,31 @@ function fetchAnalysis(symbol) {
         .then(response => response.json())
         .then(analysis => {
             displayAnalysis(analysis);
-            drawChartWithSignals(analysis);
-        });
-}
-
-function drawChartWithSignals(analysis) {
-    const chartData = Object.entries(stock.timeSeries).map(([date, values]) => ({
-        date: new Date(date),
-        open: values.open,
-        high: values.high,
-        low: values.low,
-        close: values.close,
-        volume: values.volume
-    }));
-
-    drawCandlestickChart(chartData, analysis.dailySignals);
+        })
+        .catch(error => console.error('Error fetching analysis:', error));
 }
 
 function displayAnalysis(analysis) {
     const analysisDiv = document.getElementById('analysisResults');
-
-    // Determine the latest signal
-    const intradaySignal = analysis.intradaySignals[analysis.intradaySignals.length - 1];
-    const dailySignal = analysis.dailySignals[analysis.dailySignals.length - 1];
-
     analysisDiv.innerHTML = `
-        <h4>Intraday Recommendation:</h4>
-        <p>${intradaySignal}</p>
-        <h4>Daily Recommendation:</h4>
-        <p>${dailySignal}</p>
+        <h4>Signals</h4>
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Intraday Signal</h5>
+                <p>${analysis.intradaySignal}</p>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Hourly Signal</h5>
+                <p>${analysis.hourlySignal}</p>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Daily Signal</h5>
+                <p>${analysis.dailySignal}</p>
+            </div>
+        </div>
     `;
 }
-

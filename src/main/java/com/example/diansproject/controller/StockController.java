@@ -27,6 +27,7 @@ public class StockController {
         // Return the processed stock data
         return realTimeProcessingService.getProcessedStock(symbol);
     }
+
     @GetMapping("/analyze/{symbol}")
     public StockAnalysis analyzeStock(@PathVariable String symbol) {
         return analysisService.analyze(symbol);
