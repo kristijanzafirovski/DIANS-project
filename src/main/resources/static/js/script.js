@@ -109,18 +109,27 @@ function fetchAnalysis(ticker) {
         });
 }
 
-function validateAnalysisResponse(analysis) {
-    return analysis && typeof analysis === 'object' &&
-        ['dailySignal', 'intradaySignal', 'hourlySignal'].every(key => key in analysis);
-}
+
 
 function displayAnalysis(analysis) {
-    const analysisResults = document.getElementById('analysisResults');
-    analysisResults.innerHTML = `
-        <p>Daily Signal: ${analysis.dailySignal}</p>
-        <p>Intraday Signal: ${analysis.intradaySignal}</p>
-        <p>Hourly Signal: ${analysis.hourlySignal}</p>
-    `;
+    const dailySignalElement = document.getElementById('dailySignal');
+    const intradaySignalElement = document.getElementById('intradaySignal');
+
+    // Clear existing classes
+    dailySignalElement.className = 'signal-card';
+    intradaySignalElement.className = 'signal-card';
+
+    // Set appropriate classes based on signals
+    dailySignalElement.classList.add(analysis.latestDailySignal.toLowerCase());
+    intradaySignalElement.classList.add(analysis.latestIntradaySignal.toLowerCase());
+
+    dailySignalElement.innerText = analysis.latestDailySignal;
+    intradaySignalElement.innerText = analysis.latestIntradaySignal;
+}
+
+function validateAnalysisResponse(analysis) {
+    return analysis && typeof analysis === 'object' &&
+        ['latestDailySignal', 'latestIntradaySignal'].every(key => key in analysis);
 }
 
 function displayErrorMessage(message) {

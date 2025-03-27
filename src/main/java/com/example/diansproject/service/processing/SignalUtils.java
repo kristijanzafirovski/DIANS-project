@@ -17,9 +17,6 @@ public class SignalUtils {
         double rsiValue = rsi.getValue(index).doubleValue();
         double macdValue = macd.getValue(index).doubleValue();
 
-        log.info("Index {}: shortMA={}, longMA={}, RSI={}, MACD={}",
-                index, shortMA, longMA, rsiValue, macdValue);
-
         if (shortMA > longMA && rsiValue < 30 && macdValue > 0) {
             log.info("BUY signal triggered");
             return Signal.BUY;
@@ -27,34 +24,15 @@ public class SignalUtils {
             log.info("SELL signal triggered");
             return Signal.SELL;
         }
+        if (shortMA >= longMA * 0.98 && rsiValue <= 40 && macdValue >= -0.5) {
+            log.info("BUY signal triggered under relaxed conditions");
+            return Signal.BUY;
+        } else if (shortMA <= longMA * 1.02 && rsiValue >= 60 && macdValue <= 0.5) {
+            log.info("SELL signal triggered under relaxed conditions");
+            return Signal.SELL;
+        }
 
         return Signal.NEUTRAL;
     }
 
-    public static String getFinalSignal(List<String> signals) {
-        int buyCount = 0;
-        int sellCount = 0;
-        int neutralCount = 0;
-
-        for (String signal : signals) {
-            if (signal.equalsIgnoreCase(Signal.BUY.toString())) {
-                buyCount++;
-            } else if (signal.equalsIgnoreCase(Signal.SELL.toString())) {
-                sellCount++;
-            } else {
-                neutralCount++;
-            }
-        }
-
-        // Determine the aggregate signal based on the counts
-        if (buyCount > sellCount && buyCount > neutralCount) {
-            return Signal.BUY.toString();
-        } else if (sellCount > buyCount && sellCount > neutralCount) {
-            return Signal.SELL.toString();
-        }
-        return Signal.NEUTRAL.toString(); // return NEUTRAL if balanced or mostly neutral
-    }
-    public static String getLatestSignal(List<String> signals) {
-        return signals.get(signals.size() - 1);
-    }
 }

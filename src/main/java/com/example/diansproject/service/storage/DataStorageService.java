@@ -38,12 +38,14 @@ public class DataStorageService {
     }
 
     public void saveOrUpdateStock(String symbol, Map<LocalDate, DailyStockData> dailyTimeSeries,
-                                  Map<LocalDateTime, IntradayStockData> intradayTimeSeries) {
+                                  Map<LocalDateTime, IntradayStockData> intradayTimeSeries,
+                                  Map<LocalDateTime, IntradayStockData> hourlyTimeSeries) {
         List<Stock> existingStocks = stockRepository.findBySymbol(symbol);
         if (!existingStocks.isEmpty()) {
             Stock existingStock = existingStocks.get(0);
             existingStock.setTimeSeries(dailyTimeSeries); // Update daily data
             existingStock.setIntradayTimeSeries(intradayTimeSeries); // Update intraday data
+            existingStock.setHourlyTimeSeries(hourlyTimeSeries);
             stockRepository.save(existingStock);
         } else {
             Stock newStock = new Stock(symbol, LocalDate.now(), "US/Eastern", dailyTimeSeries);

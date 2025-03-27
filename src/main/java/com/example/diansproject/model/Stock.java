@@ -6,6 +6,7 @@ import lombok.Setter;
 import org.springframework.data.domain.Persistable;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,6 +38,10 @@ public class Stock implements Persistable<Long> {
     @CollectionTable(name = "stock_intraday_series", joinColumns = @JoinColumn(name = "stock_id"))
     private Map<String, IntradayStockData> intradayTimeSeries;
 
+    @ElementCollection
+    @CollectionTable(name = "hourly_intraday_series", joinColumns = @JoinColumn(name = "stock_id"))
+    private Map<String, IntradayStockData> hourlyTimeSeries;
+
     @Transient
     private boolean isNew = true;
 
@@ -50,6 +55,28 @@ public class Stock implements Persistable<Long> {
         this.intradayTimeSeries = new HashMap<>();
     }
 
+    public void setHourlyTimeSeries(Map<LocalDateTime, IntradayStockData> hourlyTS) {
+        if (hourlyTS != null) {
+            this.hourlyTimeSeries = new HashMap<>();
+            hourlyTS.forEach((key, value) ->
+                    this.hourlyTimeSeries.put(key.format(java.time.format.DateTimeFormatter.ISO_DATE_TIME), value)
+            );
+        } else {
+            this.hourlyTimeSeries = new HashMap<>();
+        }
+    }
+
+    public void setIntradayTimeSeries(Map<LocalDateTime, IntradayStockData> intradayTimeSeries) {
+        if (intradayTimeSeries != null) {
+            this.intradayTimeSeries = new HashMap<>();
+            intradayTimeSeries.forEach((key, value) ->
+                    this.intradayTimeSeries.put(key.format(java.time.format.DateTimeFormatter.ISO_DATE_TIME), value)
+            );
+        } else {
+            this.intradayTimeSeries = new HashMap<>();
+        }
+    }
+
     @Override
     public Long getId() {
         return id;
@@ -59,11 +86,6 @@ public class Stock implements Persistable<Long> {
     public boolean isNew() {
         return isNew;
     }
-
-    public void setIsNew(boolean isNew) {
-        this.isNew = isNew;
-    }
-
     @PrePersist
     void onCreate() {
         if (this.lastRefreshed == null) {
