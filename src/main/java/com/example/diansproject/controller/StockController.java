@@ -30,7 +30,6 @@ public class StockController {
     public Map<String, String> analyzeStock(@PathVariable String symbol) {
         StockAnalysis analysis = analysisService.analyze(symbol);
 
-        // Return a simplified response containing only the signals
         Map<String, String> signals = new HashMap<>();
         signals.put("latestDailySignal", analysis.getLatestDailySignal());
         signals.put("latestIntradaySignal", analysis.getLatestIntradaySignal());

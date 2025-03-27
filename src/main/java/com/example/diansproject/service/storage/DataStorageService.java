@@ -22,10 +22,6 @@ public class DataStorageService {
         this.stockRepository = stockRepository;
     }
 
-    public void saveStock(List<Stock> stocks) {
-        stockRepository.saveAll(stocks);
-    }
-
     public Map<String, Object> fetchData(String ticker) {
         List<Stock> stocks = stockRepository.findBySymbol(ticker);
         if (stocks.isEmpty()) return Map.of();

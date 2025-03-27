@@ -19,7 +19,8 @@ function fetchStockData(ticker) {
             }
             return response.json();
         })
-        .then(data => formatAndDisplayStockData(data))
+        .then(data => {console.log(data);formatAndDisplayStockData(data);
+            })
         .catch(error => {
             console.error('Error fetching stock data:', error);
             displayErrorMessage('An error occurred while fetching stock data. Please try again.');
@@ -80,12 +81,17 @@ function formatAndDisplayStockData(data) {
         volume: parseInt(values.volume, 10),
     }));
 
-    if (typeof drawCandlestickChart === 'function') {
-        drawCandlestickChart(chartData);
+    if (Array.isArray(chartData) && chartData.length > 0) {
+        if (typeof drawCandlestickChart === 'function') {
+            drawCandlestickChart(chartData);
+        } else {
+            console.error('drawCandlestickChart is not defined.');
+        }
     } else {
-        console.error('drawCandlestickChart is not defined.');
+        console.error('No data available for chart.');
     }
 }
+
 
 function fetchAnalysis(ticker) {
     fetch(`/analyze/${ticker}`)
@@ -112,24 +118,36 @@ function fetchAnalysis(ticker) {
 
 
 function displayAnalysis(analysis) {
+    // Helper function to handle signal element setup
+    function setupSignalElement(element, signal) {
+        // Clear all existing classes except the default 'signal-card' class
+        element.classList.remove('buy', 'sell', 'neutral');
+        element.classList.add('signal-card');
+        // Add the new class based on the signal
+        element.classList.add(signal.toLowerCase());
+        // Clear any existing content in the element
+        element.innerHTML = '';
+        // Create and append a <p> element with the signal text
+        const signalTextElement = document.createElement('p');
+        signalTextElement.innerText = signal.toUpperCase();
+        element.appendChild(signalTextElement);
+    }
+
+    // Select signal elements by their IDs
     const dailySignalElement = document.getElementById('dailySignal');
     const intradaySignalElement = document.getElementById('intradaySignal');
+    const hourlySignalElement = document.getElementById('hourlySignal');
 
-    // Clear existing classes
-    dailySignalElement.className = 'signal-card';
-    intradaySignalElement.className = 'signal-card';
-
-    // Set appropriate classes based on signals
-    dailySignalElement.classList.add(analysis.latestDailySignal.toLowerCase());
-    intradaySignalElement.classList.add(analysis.latestIntradaySignal.toLowerCase());
-
-    dailySignalElement.innerText = analysis.latestDailySignal;
-    intradaySignalElement.innerText = analysis.latestIntradaySignal;
+    // Apply signal setup for each element
+    setupSignalElement(dailySignalElement, analysis.latestDailySignal);
+    setupSignalElement(intradaySignalElement, analysis.latestIntradaySignal);
+    setupSignalElement(hourlySignalElement, analysis.latestHourlySignal);
 }
+
 
 function validateAnalysisResponse(analysis) {
     return analysis && typeof analysis === 'object' &&
-        ['latestDailySignal', 'latestIntradaySignal'].every(key => key in analysis);
+        ['latestDailySignal', 'latestIntradaySignal', 'latestHourlySignal'].every(key => key in analysis);
 }
 
 function displayErrorMessage(message) {

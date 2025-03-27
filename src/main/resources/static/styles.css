@@ -6,11 +6,19 @@ body {
     height: 100vh;
     flex-direction: column;
 }
-
+.daily-data{
+    max-width: 30%;
+    height: 100%;
+    text-align: center;
+}
 .ticker-input {
     width: 300px;
 }
-
+.candlestick{
+    width: 50px;
+    height: 200px;
+    border: 1px solid black;
+}
 #timeSeriesData {
     padding-left: 20px;
 }
@@ -44,22 +52,23 @@ body {
     text-align: center;
 }
 
-.signal-card {
+/* Increase specificity by combining multiple classes */
+.signal-container .signal-item .signal-card {
     width: 100%;
     height: 60px;
     border-radius: 8px;
     margin-top: 10px;
-    transition: background-color 0.3s ease;
 }
 
-.signal-card.buy {
+/* Make signal states more specific */
+.signal-container .signal-item .signal-card.buy {
     background-color: #4CAF50;
 }
 
-.signal-card.sell {
+.signal-container .signal-item .signal-card.sell {
     background-color: #f44336;
 }
 
-.signal-card.neutral {
+.signal-container .signal-item .signal-card.neutral {
     background-color: #9e9e9e;
 }

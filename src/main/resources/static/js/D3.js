@@ -46,24 +46,6 @@ export function drawCandlestickChart(data, signals) {
         .attr('stroke', 'black');
 
     // Add signal markers
-    svg.selectAll('.signal-marker')
-        .data(signals)
-        .enter()
-        .append('path')
-        .attr('class', 'signal-marker')
-        .attr('d', function(d, i) {
-            const date = data[i].date;
-            const price = d === 'BUY' ?
-                Math.min(data[i].low * 0.99, data[i].close * 0.98) :
-                Math.max(data[i].high * 1.01, data[i].close * 1.02);
-
-            return d === 'BUY' ?
-                `M ${xScale(date)-5},${yScale(price)} l 10,-5 l 5,5 z` :
-                `M ${xScale(date)-5},${yScale(price)} l 10,5 l 5,-5 z`;
-        })
-        .attr('fill', d => d === 'BUY' ? '#4CAF50' : '#F44336')
-        .attr('stroke', d => d === 'BUY' ? '#2E7D32' : '#C62828')
-        .style('opacity', 0.7);
 
     // Add axes
     svg.append('g')

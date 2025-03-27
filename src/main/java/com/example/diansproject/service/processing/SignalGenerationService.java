@@ -174,32 +174,61 @@ public class SignalGenerationService {
                 .collect(Collectors.toList());
     }
 
-    private List<Bar> createBarsFromIntradayData(Map<LocalDateTime, IntradayStockData> intradayData) {
-        // Define the time zone explicitly (e.g., UTC or another specific time zone)
+    private List<Bar> createBarsFromIntradayData(Map<?, IntradayStockData> intradayData) {
+        // Define the time zone explicitly
         java.time.ZoneId zoneId = java.time.ZoneId.of("UTC");
 
         return intradayData.entrySet().stream()
                 .map(entry -> {
+                    Object key = entry.getKey();
                     IntradayStockData data = entry.getValue();
-                    // Convert LocalDateTime to ZonedDateTime with a specific ZoneId
-                    ZonedDateTime zonedDateTime = entry.getKey().atZone(zoneId);
+
+                    // Safely handle keys that may be strings
+                    LocalDateTime localDateTime;
+                    if (key instanceof String) {
+                        // Parse the string into LocalDateTime (Assume ISO-8601 format)
+                        localDateTime = LocalDateTime.parse((String) key);
+                    } else if (key instanceof LocalDateTime) {
+                        localDateTime = (LocalDateTime) key;
+                    } else {
+                        throw new IllegalArgumentException("Unexpected key type in intradayData map: " + key.getClass().getName());
+                    }
+
+                    // Convert LocalDateTime to ZonedDateTime
+                    ZonedDateTime zonedDateTime = localDateTime.atZone(zoneId);
+
                     return new BaseBar(Duration.ofMinutes(5), zonedDateTime,
                             data.getOpen(), data.getHigh(), data.getLow(), data.getClose(), data.getVolume());
                 })
                 .collect(Collectors.toList());
     }
 
-    private List<Bar> createBarsFromHourlyData(Map<LocalDateTime, IntradayStockData> hourlyData) {
-        // Define the time zone explicitly (e.g., UTC or another specific time zone)
+    private List<Bar> createBarsFromHourlyData(Map<?, IntradayStockData> intradayData) {
+        // Define the time zone explicitly
         java.time.ZoneId zoneId = java.time.ZoneId.of("UTC");
 
-        return hourlyData.entrySet().stream()
+        return intradayData.entrySet().stream()
                 .map(entry -> {
+                    Object key = entry.getKey();
                     IntradayStockData data = entry.getValue();
-                    // Convert LocalDateTime to ZonedDateTime with a specific ZoneId
-                    ZonedDateTime zonedDateTime = entry.getKey().atZone(zoneId);
+
+                    // Safely handle keys that may be strings
+                    LocalDateTime localDateTime;
+                    if (key instanceof String) {
+                        // Parse the string into LocalDateTime (Assume ISO-8601 format)
+                        localDateTime = LocalDateTime.parse((String) key);
+                    } else if (key instanceof LocalDateTime) {
+                        localDateTime = (LocalDateTime) key;
+                    } else {
+                        throw new IllegalArgumentException("Unexpected key type in intradayData map: " + key.getClass().getName());
+                    }
+
+                    // Convert LocalDateTime to ZonedDateTime
+                    ZonedDateTime zonedDateTime = localDateTime.atZone(zoneId);
+
                     return new BaseBar(Duration.ofHours(1), zonedDateTime,
                             data.getOpen(), data.getHigh(), data.getLow(), data.getClose(), data.getVolume());
-                }).collect(Collectors.toList());
+                })
+                .collect(Collectors.toList());
     }
 }

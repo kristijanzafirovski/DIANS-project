@@ -16,9 +16,8 @@
         </div>
     </div>
 </div>
-<div class="container-fluid">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
+<div class="container-fluid d-flex flex-row flex-start">
+        <div class="col-md-6 daily-data">
             <div class="card mt-3">
                 <div class="card-body">
                     <h5 class="card-title">Daily Stock Information</h5>
@@ -28,6 +27,11 @@
                         <option value="">Select Date</option>
                     </select>
                     <div id="selectedDateData"></div>
+                    <div class="container-fluid d-flex"> <div class="candlestick">
+
+                    </div>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -50,10 +54,13 @@
                             <h6>Intraday (5 minute) Signal</h6>
                             <div id="intradaySignal" class="signal-card"></div>
                         </div>
+                        <div class="signal-item">
+                            <h6>Intraday (1 Hour) Signal</h6>
+                            <div id="hourlySignal" class="signal-card"></div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
     </div>
 </div>
 <script src="js/script.js" type="module"></script>
