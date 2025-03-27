@@ -18,42 +18,48 @@ import java.util.List;
 @Slf4j
 @Service
 public class DataIngestService {
+
+    private final AlphaVantage alphaVantageClient;
+    private final StockRepository stockRepository;
+
     @Autowired
-    private AlphaVantage alphaVantageClient;
-    @Autowired
-    private StockRepository stockRepository;
+    public DataIngestService(AlphaVantage alphaVantageClient, StockRepository stockRepository) {
+        this.alphaVantageClient = alphaVantageClient;
+        this.stockRepository = stockRepository;
+    }
 
     public List<StockUnit> fetchData(String ticker) {
-        // Check if stock is updated today
-        if (stockRepository.findBySymbol(ticker).isEmpty()) {
-            log.info("No stock found for symbol: " + ticker);
-            TimeSeriesResponse response = alphaVantageClient.timeSeries().daily().forSymbol(ticker).fetchSync();
-            return response.getStockUnits();
-        } else {
-            log.info("Stock found for symbol: " + ticker);
-            TimeSeriesResponse response = alphaVantageClient.timeSeries().daily().forSymbol(ticker).fetchSync();
-            return response.getStockUnits();
-        }
+        return fetchStockUnits(() -> alphaVantageClient.timeSeries().daily().outputSize(OutputSize.FULL).forSymbol(ticker).fetchSync());
     }
+
     public List<StockUnit> fetchHourlyIntradayData(String ticker) {
-        TimeSeriesResponse response = alphaVantageClient.timeSeries().intraday()
+        return fetchStockUnits(() -> alphaVantageClient.timeSeries()
+                .intraday()
                 .forSymbol(ticker)
                 .interval(Interval.SIXTY_MIN)
                 .outputSize(OutputSize.FULL)
-                .onFailure(e->handleFailure(e))
-                .fetchSync();
-        return response.getStockUnits();
+                .fetchSync());
     }
+
     public List<StockUnit> fetchIntradayData(String ticker) {
-
-            TimeSeriesResponse response = alphaVantageClient.timeSeries().intraday().forSymbol(ticker).
-                    interval(Interval.FIVE_MIN).outputSize(OutputSize.FULL).
-                    onFailure(e->handleFailure(e)).fetchSync();
-            return response.getStockUnits();
-
+        return fetchStockUnits(() -> alphaVantageClient.timeSeries()
+                .intraday()
+                .forSymbol(ticker)
+                .interval(Interval.FIVE_MIN)
+                .outputSize(OutputSize.FULL)
+                .fetchSync());
     }
 
-    private void handleFailure(AlphaVantageException e){
+    private List<StockUnit> fetchStockUnits(DataFetchOperation operation) {
+        try {
+            return operation.fetch().getStockUnits();
+        } catch (AlphaVantageException e) {
+            log.error("Failed to fetch stock data: {}", e.getMessage());
+            return List.of();
+        }
+    }
 
+    private interface DataFetchOperation {
+        TimeSeriesResponse fetch();
     }
 }

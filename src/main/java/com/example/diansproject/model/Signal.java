@@ -3,7 +3,8 @@ package com.example.diansproject.model;
 
 public enum Signal {
     BUY("BUY"),
-    SELL("SELL");
+    SELL("SELL"),
+    NEUTRAL("NEUTRAL");
 
     private final String label;
 
