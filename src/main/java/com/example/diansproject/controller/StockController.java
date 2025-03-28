@@ -23,6 +23,7 @@ public class StockController {
 
     @GetMapping("/stocks/{symbol}")
     public Map<String, Object> getStockData(@PathVariable String symbol) {
+
         return dataStorageService.fetchData(symbol);
     }
 

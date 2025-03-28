@@ -89,7 +89,7 @@ public class DataIngestService {
 
     private Map<LocalDate, DailyStockData> fetchDailyData(String symbol) {
         log.info("Fetching daily data for symbol: {}", symbol);
-        String url = String.format("%s/time_series?symbol=%s&interval=1day&apikey=%s", BASE_URL, symbol, apiKey);
+        String url = String.format("%s/time_series?symbol=%s&interval=1day&apikey=%s&outputsize=200", BASE_URL, symbol, apiKey);
 
         try {
             TwelveDataResponse response = restTemplate.getForObject(url, TwelveDataResponse.class);

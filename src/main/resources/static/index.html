@@ -8,6 +8,12 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+<div id="loadingOverlay" class="loading-overlay">
+    <div class="spinner-border text-primary" role="status">
+        <span class="sr-only">Loading...</span>
+    </div>
+</div>
+
 <div class="text-center"><h1>Stock Ticker Search</h1>
     <div class="input-group ticker-input">
         <input type="text" class="form-control" id="ticker" placeholder="Enter stock ticker">
@@ -17,50 +23,57 @@
     </div>
 </div>
 <div class="container-fluid d-flex flex-row flex-start">
-        <div class="col-md-6 daily-data">
-            <div class="card mt-3">
-                <div class="card-body">
-                    <h5 class="card-title">Daily Stock Information</h5>
-                    <p id="sname">Stock name:</p>
-                    <p id="stime">Time since last update:</p>
-                    <select id="dateSelect" style="width: 200px;">
-                        <option value="">Select Date</option>
-                    </select>
-                    <div id="selectedDateData"></div>
-                    <div class="container-fluid d-flex"> <div class="candlestick">
+    <div class="col-md-6 daily-data">
+        <div class="card mt-3">
+            <div class="card-body">
+                <h5 class="card-title">Daily Stock Information</h5>
+                <p id="sname">Stock name:</p>
+                <p id="stime">Time since last update:</p>
+                <select id="dateSelect" style="width: 200px;">
+                    <option value="">Select Date</option>
+                </select>
+                <div id="selectedDateData"></div>
+                <div class="container-fluid d-flex">
+                    <div class="candlestick">
 
                     </div>
-                    </div>
-
                 </div>
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="card mt-3">
-                <div class="card-body">
+    </div>
+    <div class="col-md-6">
+        <div class="card mt-3">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
                     <h5 class="card-title">Daily Chart</h5>
-                    <div id="chart"></div>
+                    <div id="intervalButtons" style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
+                        <button style="margin: 0 5px; padding: 5px 10px; cursor: pointer; background: #007bff; color: #fff; border: none; border-radius: 3px;">1D</button>
+                        <button style="margin: 0 5px; padding: 5px 10px; cursor: pointer; background: #007bff; color: #fff; border: none; border-radius: 3px;">1H</button>
+                        <button style="margin: 0 5px; padding: 5px 10px; cursor: pointer; background: #007bff; color: #fff; border: none; border-radius: 3px;">5M</button>
+                    </div>
                 </div>
+                <div id="chart"></div>
             </div>
-            <div class="card mt-3">
-                <div class="card-body">
-                    <h5 class="card-title">Analysis Signals</h5>
-                    <div class="signal-container">
-                        <div class="signal-item">
-                            <h6>Daily Signal</h6>
-                            <div id="dailySignal" class="signal-card"></div>
-                        </div>
-                        <div class="signal-item">
-                            <h6>Intraday (5 minute) Signal</h6>
-                            <div id="intradaySignal" class="signal-card"></div>
-                        </div>
-                        <div class="signal-item">
-                            <h6>Intraday (1 Hour) Signal</h6>
-                            <div id="hourlySignal" class="signal-card"></div>
-                        </div>
+        </div>
+        <div class="card mt-3">
+            <div class="card-body">
+                <h5 class="card-title">Analysis Signals</h5>
+                <div class="signal-container">
+                    <div class="signal-item">
+                        <h6>Daily Signal</h6>
+                        <div id="dailySignal" class="signal-card"></div>
+                    </div>
+                    <div class="signal-item">
+                        <h6>Intraday (5 minute) Signal</h6>
+                        <div id="intradaySignal" class="signal-card"></div>
+                    </div>
+                    <div class="signal-item">
+                        <h6>Intraday (1 Hour) Signal</h6>
+                        <div id="hourlySignal" class="signal-card"></div>
                     </div>
                 </div>
             </div>
+        </div>
     </div>
 </div>
 <script src="js/script.js" type="module"></script>

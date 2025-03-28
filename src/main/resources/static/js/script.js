@@ -11,7 +11,18 @@ document.getElementById('searchButton').addEventListener('click', () => {
     }
 });
 
+// Add event listeners for interval buttons
+document.querySelectorAll('#intervalButtons button').forEach(button => {
+    button.addEventListener('click', () => {
+        const interval = button.textContent === '1D' ? 'daily' :
+            button.textContent === '1H' ? 'hourly' : '5min';
+        updateChartForInterval(interval, { dailyTimeSeries, intradayTimeSeries, hourlyTimeSeries });
+    });
+});
+
+// Rest of the code remains the same...
 function fetchStockData(ticker) {
+    showLoading();
     fetch(`/stocks/${ticker}`)
         .then(response => {
             if (!response.ok) {
@@ -19,11 +30,16 @@ function fetchStockData(ticker) {
             }
             return response.json();
         })
-        .then(data => {console.log(data);formatAndDisplayStockData(data);
-            })
+        .then(data => {
+            console.log(data);
+            formatAndDisplayStockData(data);
+        })
         .catch(error => {
             console.error('Error fetching stock data:', error);
             displayErrorMessage('An error occurred while fetching stock data. Please try again.');
+        })
+        .finally(() => {
+            hideLoading();
         });
 }
 
@@ -34,7 +50,7 @@ function formatAndDisplayStockData(data) {
         return;
     }
 
-    const { dailyTimeSeries, intradayTimeSeries } = data;
+    const { dailyTimeSeries, intradayTimeSeries, hourlyTimeSeries } = data;
 
     if (!dailyTimeSeries || typeof dailyTimeSeries !== 'object') {
         console.error('Invalid dailyTimeSeries data structure:', dailyTimeSeries);
@@ -42,56 +58,62 @@ function formatAndDisplayStockData(data) {
         return;
     }
 
-    // Populate the dropdown for dates (from dailyTimeSeries)
-    const dateSelect = document.getElementById('dateSelect');
-    dateSelect.innerHTML = '<option value="">Select Date</option>';
-    Object.keys(dailyTimeSeries).forEach(date => {
-        const option = document.createElement('option');
-        option.value = date;
-        option.text = date;
-        dateSelect.appendChild(option);
-    });
+    // Default to rendering the daily chart
+    updateChartForInterval('daily', { dailyTimeSeries, intradayTimeSeries, hourlyTimeSeries });
+}
 
-    // Update UI for selected date
-    dateSelect.addEventListener('change', () => {
-        const selectedDate = dateSelect.value;
+function updateChartForInterval(interval, seriesData) {
+    const { dailyTimeSeries, intradayTimeSeries, hourlyTimeSeries } = seriesData;
+    let chartData = [];
 
-        const selectedDateData = document.getElementById('selectedDateData');
-        const sName = document.getElementById('sname');
-        const sTime = document.getElementById('stime');
+    if (interval === 'daily') {
+        chartData = formatTimeSeriesData(dailyTimeSeries);
+    } else if (interval === 'hourly') {
+        chartData = formatTimeSeriesData(hourlyTimeSeries);
+    } else if (interval === '5min') {
+        chartData = formatTimeSeriesData(intradayTimeSeries, true); // Filter for 5-min intervals
+    }
 
-        selectedDateData.innerHTML = '';
-        if (selectedDate && dailyTimeSeries[selectedDate]) {
-            const dailyData = dailyTimeSeries[selectedDate];
-            sName.innerText = `Stock Symbol: ${ticker}`;
-            sTime.innerText = `Selected date: ${selectedDate}`;
-            const dataElement = document.createElement('p');
-            dataElement.innerText = `Open: ${dailyData.open}, High: ${dailyData.high}, Low: ${dailyData.low}, Close: ${dailyData.close}, Volume: ${dailyData.volume}`;
-            selectedDateData.appendChild(dataElement);
-        }
-    });
+    if (chartData.length > 0) {
+        clearChartContainer(); // Clear any existing chart
+        drawCandlestickChart(chartData); // Redraw the chart
+    } else {
+        displayErrorMessage(`No data available for the selected interval: ${interval}`);
+    }
+}
 
-    // Prepare and display the candlestick chart (e.g., using dailyTimeSeries)
-    const chartData = Object.entries(dailyTimeSeries).map(([date, values]) => ({
-        date: new Date(date),
+function formatTimeSeriesData(timeSeries, isFiveMinute = false) {
+    if (!timeSeries || typeof timeSeries !== 'object') {
+        return [];
+    }
+
+    // Optionally filter for 5-minute intervals
+    const filteredTimeSeries = isFiveMinute
+        ? Object.fromEntries(
+            Object.entries(timeSeries).filter(([key]) => {
+                const minutes = new Date(key).getMinutes();
+                return minutes % 5 === 0; // Only include 5-minute intervals
+            })
+        )
+        : timeSeries;
+
+    // Map the time series to chart-friendly format
+    return Object.entries(filteredTimeSeries).map(([timestamp, values]) => ({
+        date: new Date(timestamp),
         open: parseFloat(values.open),
         high: parseFloat(values.high),
         low: parseFloat(values.low),
         close: parseFloat(values.close),
         volume: parseInt(values.volume, 10),
     }));
-
-    if (Array.isArray(chartData) && chartData.length > 0) {
-        if (typeof drawCandlestickChart === 'function') {
-            drawCandlestickChart(chartData);
-        } else {
-            console.error('drawCandlestickChart is not defined.');
-        }
-    } else {
-        console.error('No data available for chart.');
-    }
 }
 
+function clearChartContainer() {
+    const chartContainer = document.getElementById('chartContainer');
+    if (chartContainer) {
+        chartContainer.innerHTML = ''; // Clear the container
+    }
+}
 
 function fetchAnalysis(ticker) {
     fetch(`/analyze/${ticker}`)
@@ -115,41 +137,48 @@ function fetchAnalysis(ticker) {
         });
 }
 
-
-
-function displayAnalysis(analysis) {
-    // Helper function to handle signal element setup
-    function setupSignalElement(element, signal) {
-        // Clear all existing classes except the default 'signal-card' class
-        element.classList.remove('buy', 'sell', 'neutral');
-        element.classList.add('signal-card');
-        // Add the new class based on the signal
-        element.classList.add(signal.toLowerCase());
-        // Clear any existing content in the element
-        element.innerHTML = '';
-        // Create and append a <p> element with the signal text
-        const signalTextElement = document.createElement('p');
-        signalTextElement.innerText = signal.toUpperCase();
-        element.appendChild(signalTextElement);
-    }
-
-    // Select signal elements by their IDs
-    const dailySignalElement = document.getElementById('dailySignal');
-    const intradaySignalElement = document.getElementById('intradaySignal');
-    const hourlySignalElement = document.getElementById('hourlySignal');
-
-    // Apply signal setup for each element
-    setupSignalElement(dailySignalElement, analysis.latestDailySignal);
-    setupSignalElement(intradaySignalElement, analysis.latestIntradaySignal);
-    setupSignalElement(hourlySignalElement, analysis.latestHourlySignal);
-}
-
-
 function validateAnalysisResponse(analysis) {
     return analysis && typeof analysis === 'object' &&
         ['latestDailySignal', 'latestIntradaySignal', 'latestHourlySignal'].every(key => key in analysis);
 }
 
+function displayAnalysis(analysis) {
+    function setupSignalElement(element, signal) {
+        element.classList.remove('buy', 'sell', 'neutral');
+        element.classList.add('signal-card');
+        element.classList.add(signal.toLowerCase());
+        element.innerHTML = '';
+        const signalTextElement = document.createElement('p');
+        signalTextElement.innerText = signal.toUpperCase();
+        element.appendChild(signalTextElement);
+    }
+
+    const dailySignalElement = document.getElementById('dailySignal');
+    const intradaySignalElement = document.getElementById('intradaySignal');
+    const hourlySignalElement = document.getElementById('hourlySignal');
+
+    setupSignalElement(dailySignalElement, analysis.latestDailySignal);
+    setupSignalElement(intradaySignalElement, analysis.latestIntradaySignal);
+    setupSignalElement(hourlySignalElement, analysis.latestHourlySignal);
+}
+
+function showLoading() {
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    loadingOverlay.style.display = 'flex';
+}
+
+function hideLoading() {
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    loadingOverlay.style.display = 'none';
+}
+
 function displayErrorMessage(message) {
     alert(message);
 }
+document.querySelectorAll('#intervalButtons button').forEach(button => {
+    button.addEventListener('click', () => {
+        const interval = button.textContent === '1D' ? 'daily' :
+            button.textContent === '1H' ? 'hourly' : '5min';
+        updateChartForInterval(interval, { dailyTimeSeries, intradayTimeSeries, hourlyTimeSeries });
+    });
+});

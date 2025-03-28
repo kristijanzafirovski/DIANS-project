@@ -78,9 +78,16 @@ public class SignalGenerationService {
         // Convert daily data to a list of Bars
         List<Bar> bars = createBarsFromDailyData(dailyData);
 
+        bars = bars.stream()
+                .sorted(Comparator.comparing(Bar::getEndTime))
+                .toList();
+
+        // Verify sorting by logging first and last bars
+        log.info("First bar (should be oldest): {}", bars.get(0));
+        log.info("Last bar (should be newest): {}", bars.get(bars.size() - 1));
         // Create a BarSeries
         BarSeries series = new BaseBarSeriesBuilder().withName(symbol + " (Daily)").build();
-        bars.stream().sorted(Comparator.comparing(Bar::getEndTime)).forEach(series::addBar);
+        bars.forEach(series::addBar);
 
         // Define a trading strategy
         Strategy strategy = createSimpleMovingAverageStrategy(series);
