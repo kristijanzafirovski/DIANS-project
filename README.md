@@ -1,24 +1,64 @@
-Во оваа апликација, се користат неколку сервиси и класи кои меѓусебно соработуваат за да обезбедат анализа и сигнали за тргување со акции. Процесот започнува со DataIngestService, која е одговорна за преземање на податоците за акции од надворешни извори (обично API). 
-Преку RestTemplate, оваа класа испраќа HTTP барања за да ги добие податоците за конкретен симбол (на пример, за акциите на некоја компанија). 
-Ако податоците не се достапни во локалното складиште, се преземаат нови податоци преку API-то. Овие податоци вклучуваат информации за акциите на дневно, часовно и петминутно ниво, кои се чуваат за понатамошна обработка.
+# DIANS Project
 
-Следната класа, AnalysisService, се користи за анализа на податоците добиени од DataIngestService и SignalGenerationService. Оваа класа ја започнува анализата за дадениот симбол (на пример, за акции на одредена компанија) и го проверува дали податоците се веќе достапни во базата на податоци. 
-Ако не, AnalysisService ќе побара од DataIngestService да ги преземе податоците. Кога податоците ќе бидат добиени, SignalGenerationService генерира сигнали, кои можат да бидат BUY (купи) или SELL (продај), врз основа на историските податоци.
-Тие сигнали се користат за да се даде препорака на корисниците дали да купат или продаваат акции.
+> This project was developed as a **FINKI course project** (Faculty of Computer Science and Engineering, Ss. Cyril and Methodius University in Skopje).
 
-SignalGenerationService е сервис кој се фокусира на генерирање сигнали за тргување. За секој тип на податоци (дневни, часовни и петминутни), оваа класа ги обработува податоците и ги претвора во Bar објекти. Bar е структура која ги содржи сите потребни податоци за одреден временски период, 
-како што се отворена цена, највисока, најниска и затворена цена, како и обемот на тргување. Потоа, на овие Bar објекти се применува стратегија за движење на просечните вредности (SMA - Simple Moving Average). Користејќи SMA, се дефинираат правила кога треба да се генерира сигнал за BUY
-(кога краткорочниот SMA ќе ја пресече долгорочната во позитивен правец) или SELL (кога краткорочниот SMA ќе ја пресече долгорочната во негативен правец).
+A Spring Boot application that fetches stock market data, stores it in PostgreSQL, analyses it with technical indicators, and generates BUY / SELL signals using a Simple Moving Average (SMA) crossover strategy. Results are visualised in a D3.js web interface.
 
-Кога ќе се генерираат сигналите за BUY и SELL, тие се додаваат на списокот и се враќаат во резултатите на анализата.
+## How it works
 
-Во крајниот дел, DataStorageService е сервис кој се користи за чување и враќање на податоците за акции од база на податоци. Кога апликацијата треба да анализира податоци за даден симбол, прво ќе го провери складиштето (базата на податоци) за постоечките податоци.
-Ако податоците не се најдат, тие ќе бидат преземени преку DataIngestService и потоа ќе бидат зачувани во база на податоци. Во случај кога податоците веќе постојат, тие се користат за понатамошна анализа и генерирање сигнали.
+1. **Ingestion** (`service/ingest`): `DataIngestService` uses a `RestTemplate` to request price data for a symbol from the Twelve Data API. Daily, hourly and five-minute data are retrieved and cached in the database.
+2. **Storage** (`service/storage`): `DataStorageService` saves and loads stock data through `StockRepository`. If data for a symbol is already stored, it is reused and the API is not called again.
+3. **Processing** (`service/processing`):
+   - `SignalGenerationService` converts each data series into `Bar` objects (open, high, low, close, volume) and applies the SMA crossover rules.
+   - `AnalysisService` coordinates the workflow: it checks storage first, falls back to ingestion when needed, and returns the generated signals.
+4. **Presentation**: a static front end (`static/`) displays the price charts and signals.
 
-Целата апликација работи така што обезбедува информации за акции со кои корисниците можат да се водат при нивното тргување. За да се постигне тоа, користени се различни стратегии за анализа на историски податоци и генерирање на сигнали за купување или продавање. 
-На пример, најчесто се користи стратегија со Simple Moving Average (SMA), која е популарна за предвидување на идни трендови на пазарот.
+### Signal rules
 
-Апликацијата автоматски ги презема податоците, ги анализира и на крај генерира препораки, кои можат да се користат од трговци и инвеститори за да донесат одлуки за купување или продавање акции. Оваа автоматизација овозможува брзи и прецизни препораки базирани на историските податоци за акциите.
+- **BUY** when the short-term SMA crosses above the long-term SMA.
+- **SELL** when the short-term SMA crosses below the long-term SMA.
 
+These signals are for educational purposes and are not financial advice.
 
+## Getting started
 
+### Prerequisites
+
+- Java 17
+- PostgreSQL (or Docker)
+- A [Twelve Data](https://twelvedata.com/) API key
+
+### Configuration
+
+Set your database connection and API key without committing them to the repository. Spring Boot reads the properties below from `application.properties` or from environment variables:
+
+| Property | Environment variable |
+|---|---|
+| `twelvedata.api_key` | `TWELVEDATA_API_KEY` |
+| `spring.datasource.url` | `SPRING_DATASOURCE_URL` |
+| `spring.datasource.username` | `SPRING_DATASOURCE_USERNAME` |
+| `spring.datasource.password` | `SPRING_DATASOURCE_PASSWORD` |
+
+### Run locally
+
+```bash
+./mvnw spring-boot:run
+```
+
+Then open http://localhost:8080.
+
+### Run with Docker Compose
+
+```bash
+docker compose up --build
+```
+
+This starts the application together with a PostgreSQL container.
+
+## Tech stack
+
+Java 17 · Spring Boot 3.4 · Spring Data JPA · PostgreSQL · ta4j (technical analysis) · Twelve Data API · D3.js · Docker
+
+## Author
+
+**Kristijan Zafirovski**
